@@ -1,23 +1,37 @@
 ﻿using iTextSharp.text;
 using iTextSharp.text.pdf;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Telegram.Bot;
-using Telegram.Bot.Types.InputFiles;
+using System.Data.SqlClient;
+using System.Net.Http;
+using System.IO;
+using System.Net;
+using System.Net.Mail;
+using iTextSharp.text.xml;
 
 namespace RegistroVisitantes
 {
     public partial class Form1 : Form
     {
-        private List<string> registros = new List<string>();
-        private List<Administrador> administradores = new List<Administrador>();
+        // Configuración de la cuenta de correo electrónico de Gmail
+        const string emailFrom = "javierlarasolis1414@gmail.com";
+        const string emailTo =  "javierlarasolis79@gmail.com";
+        const string password = "javierlarasolis7922";
+        const string smtpServer = "smtp.gmail.com";
+        const int smtpPort = 587;
+        private SqlConnection sqlConnection;
+        private string connectionString = "Server=LAPTOP-J687O61R;Database=RegistroVisitantesDb;Integrated Security=True;";
         private Administrador administradorLogueado;
+        // Ruta del archivo PDF a enviar
+        string filePath = @"C:\Users\Hp\OneDrive\Escritorio\informes\InformeDiario.pdf";
+
+
         public Form1()
         {
             InitializeComponent();
+          //  _botClient = new TelegramBotClient("5926810973:AAH5j5EfLX49I_D5Z70UHIRGjDjl8SPssog");
+            sqlConnection = new SqlConnection(connectionString);
+            enviar.Visible = true;
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)
@@ -27,17 +41,31 @@ namespace RegistroVisitantes
             string contacto = textContacto.Text;
             string motivo = richTextBoxMotivo.Text;
 
-            string registro = $"Nombre: {nombre}, Apellido: {apellido}, Contacto: {contacto}, Motivo: {motivo}";
+            // Insertar el registro en la base de datos
+            string query = "INSERT INTO Registros (Nombre, Apellido, Contacto, Motivo, Fecha) " +
+                           "VALUES (@Nombre, @Apellido, @Contacto, @Motivo, @Fecha)";
 
-            registros.Add(registro);
+            using (SqlCommand cmd = new SqlCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("@Nombre", nombre);
+                cmd.Parameters.AddWithValue("@Apellido", apellido);
+                cmd.Parameters.AddWithValue("@Contacto", contacto);
+                cmd.Parameters.AddWithValue("@Motivo", motivo);
+                cmd.Parameters.AddWithValue("@Fecha", DateTime.Now);
 
+                sqlConnection.Open();
+                cmd.ExecuteNonQuery();
+                sqlConnection.Close();
+            }
+            MessageBox.Show("Datos guardados.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             LimpiarCampos();
         }
 
         private void btnGenerarInforme_Click(object sender, EventArgs e)
         {
             GenerarInformePDF();
-            // Abre un cuadro de diálogo de guardado de archivo
+
+            // Mueve el archivo generado al destino seleccionado por el usuario
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Archivos PDF (*.pdf)|*.pdf";
             saveFileDialog.FileName = "InformeDiario.pdf";
@@ -46,7 +74,7 @@ namespace RegistroVisitantes
             {
                 string rutaGuardar = saveFileDialog.FileName;
 
-                // Mueve el archivo generado al destino seleccionado por el usuario
+                // Mueve el archivo PDF generado al destino seleccionado por el usuario
                 System.IO.File.Move("InformeDiario.pdf", rutaGuardar);
 
                 MessageBox.Show("Informe PDF generado y descargado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -60,10 +88,28 @@ namespace RegistroVisitantes
             PdfWriter.GetInstance(doc, new System.IO.FileStream(nombreArchivo, System.IO.FileMode.Create));
             doc.Open();
 
-            // Agregar registros al documento
-            foreach (string registro in registros)
+            // Consulta SQL para obtener los registros desde la base de datos
+            string query = "SELECT Nombre, Apellido, Contacto, Motivo, Fecha FROM Registros";
+
+            using (SqlCommand cmd = new SqlCommand(query, sqlConnection))
             {
-                doc.Add(new Paragraph(registro));
+                sqlConnection.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    string nombre = reader.GetString(0);
+                    string apellido = reader.GetString(1);
+                    string contacto = reader.GetString(2);
+                    string motivo = reader.GetString(3);
+                    DateTime fecha = reader.GetDateTime(4);
+
+                    string registro = $"Nombre: {nombre}, Apellido: {apellido}, Contacto: {contacto}, Motivo: {motivo}, Fecha: {fecha}";
+                    doc.Add(new Paragraph(registro));
+                }
+
+                reader.Close();
+                sqlConnection.Close();
             }
 
             // Cerrar el documento
@@ -82,29 +128,43 @@ namespace RegistroVisitantes
             string nombreUsuario = txtNombreUsuarioLogin.Text;
             string contraseña = txtContraseñaLogin.Text;
 
-            // Buscar el administrador por nombre de usuario y contraseña
-            administradorLogueado = administradores.Find(admin =>
-                admin.NombreUsuario == nombreUsuario && admin.Contraseña == contraseña);
+            // Consulta SQL para autenticar al administrador
+            string query = "SELECT Id, Nombre, Apellido, Celular, NombreUsuario, Contraseña " +
+                           "FROM Administradores " +
+                           "WHERE NombreUsuario = @NombreUsuario AND Contraseña = @Contraseña";
 
-            if (administradorLogueado != null)
+            using (SqlCommand cmd = new SqlCommand(query, sqlConnection))
             {
-                // Iniciar sesión exitosa
-                MessageBox.Show("Inicio de sesión exitoso.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                cmd.Parameters.AddWithValue("@NombreUsuario", nombreUsuario);
+                cmd.Parameters.AddWithValue("@Contraseña", contraseña);
 
-                // Ocultar la pestaña de inicio de sesión
-                tabControl1.TabPages.Remove(login);
+                sqlConnection.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
 
-                // Mostrar la pestaña de registro de administradores
-                tabControl1.TabPages.Add(RegistroPers);
-                tabControl1.SelectedTab = RegistroPers; // Opcionalmente, seleccionar la pestaña de registro
+                if (reader.Read())
+                {
+                    administradorLogueado = new Administrador
+                    {
+                        Id = reader.GetInt32(0),
+                        Nombre = reader.GetString(1),
+                        Apellido = reader.GetString(2),
+                        Celular = reader.GetString(3),
+                        NombreUsuario = reader.GetString(4),
+                        Contraseña = reader.GetString(5)
+                    };
+                    MessageBox.Show("Inicio de sesión exitoso.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // También puedes ocultar/deshabilitar otras pestañas según sea necesario.
-                // Ejemplo:
-                // tabControl1.TabPages.Remove(OtraPestaña);
-            }
-            else
-            {
-                MessageBox.Show("Nombre de usuario o contraseña incorrectos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    tabControl1.TabPages.Remove(login);
+                    tabControl1.TabPages.Add(RegistroPers);
+                    tabControl1.SelectedTab = RegistroPers; 
+                }
+                else
+                {
+                    MessageBox.Show("Nombre de usuario o contraseña incorrectos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                reader.Close();
+                sqlConnection.Close();
             }
         }
 
@@ -136,7 +196,7 @@ namespace RegistroVisitantes
             string nombreUsuario = txtNombreUsuario.Text;
             string contraseña = txtContraseña.Text;
 
-            // Validar que no falten campos
+            // Validar que no falten campos (puedes hacerlo aquí o en el formulario)
             if (string.IsNullOrWhiteSpace(nombre) || string.IsNullOrWhiteSpace(apellido) ||
                 string.IsNullOrWhiteSpace(celular) || string.IsNullOrWhiteSpace(nombreUsuario) ||
                 string.IsNullOrWhiteSpace(contraseña))
@@ -145,16 +205,27 @@ namespace RegistroVisitantes
                 return;
             }
 
-            // Crear un nuevo administrador
-            Administrador nuevoAdmin = new Administrador(nombre, apellido, celular, nombreUsuario, contraseña);
-            administradores.Add(nuevoAdmin);
+            // Insertar el administrador en la base de datos
+            string query = "INSERT INTO Administradores (Nombre, Apellido, Celular, NombreUsuario, Contraseña) " +
+                           "VALUES (@Nombre, @Apellido, @Celular, @NombreUsuario, @Contraseña)";
 
-            // Limpiar los campos después de registrar
-            LimpiarCamposRegistro();
+            using (SqlCommand cmd = new SqlCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("@Nombre", nombre);
+                cmd.Parameters.AddWithValue("@Apellido", apellido);
+                cmd.Parameters.AddWithValue("@Celular", celular);
+                cmd.Parameters.AddWithValue("@NombreUsuario", nombreUsuario);
+                cmd.Parameters.AddWithValue("@Contraseña", contraseña);
 
+                sqlConnection.Open();
+                cmd.ExecuteNonQuery();
+                sqlConnection.Close();
+            }
             // Vuelve a mostrar la pestaña de inicio de sesión y oculta la de registro de administradores
             tabControl1.TabPages.Remove(RegistroAdmin); // Oculta la pestaña de registro
             tabControl1.TabPages.Insert(0, login); // Muestra la pestaña de inicio de sesión en la posición 0 (primera pestaña visible)
+
+            LimpiarCamposRegistro();
         }
         private void LimpiarCamposRegistro()
         {
@@ -165,78 +236,46 @@ namespace RegistroVisitantes
             txtContraseña.Clear();
         }
 
-        private async void enviar_Click(object sender, EventArgs e)
-        {
-            /*try
-            {
-                // Reemplaza 'YOUR_BOT_TOKEN' con el token de tu bot de Telegram
-                var botToken = "6445372079:AAERg1I_iT076sgAiWbszVekXpRsVpQAaSA";
-
-                // Reemplaza 'CHAT_ID' con el ID del chat al que deseas enviar el archivo
-                var chatId = 1212994856;
-
-                // Inicializa el cliente de Telegram Bot
-                var botClient = new TelegramBotClient(botToken);
-
-                // Ruta al archivo que deseas enviar
-                string archivoInforme = "InformeDiario.pdf";
-
-                using (var stream = System.IO.File.Open(archivoInforme, FileMode.Open))
-                {
-                    var fileName = Path.GetFileName(archivoInforme);
-
-                    // Crea un objeto InputOnlineFile con el archivo y su nombre
-                    var inputFile = new InputOnlineFile(stream, fileName);
-
-                    // Envía el archivo al chat
-                    await botClient.SendDocumentAsync(chatId, inputFile);
-
-                    // El archivo se envió correctamente
-                    MessageBox.Show("Informe enviado correctamente a través de Telegram.");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al enviar el informe a través de Telegram: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }*/
-            await enviarMensajeAsync();
-        }
-        private async Task enviarMensajeAsync()
+        private void enviar_Click(object sender, EventArgs e)
         {
             try
             {
-                // Paso 1: Reemplaza 'YOUR_BOT_TOKEN' con el token de tu bot de Telegram
-                var botToken = "5926810973:AAH5j5EfLX49I_D5Z70UHIRGjDjl8SPssog";
+                // Crear una nueva instancia de MailMessage
+                MailMessage message = new MailMessage();
 
-                // Paso 2: Reemplaza 'CHAT_ID' con el ID del chat al que deseas enviar el archivo
-                var chatId = 1212994856; // Asegúrate de que este sea el ID correcto
+                // Configurar el remitente y el destinatario
+                message.From = new MailAddress(emailFrom);
+                message.To.Add(new MailAddress(emailTo));
 
-                // Paso 3: Inicializa el cliente de Telegram Bot
-                var botClient = new TelegramBotClient(botToken);
+                // Agregar el asunto y el cuerpo del mensaje
+                message.Subject = "Envío de archivo PDF";
+                message.Body = "Se ha adjuntado el archivo PDF";
 
-                // Paso 4: Ruta al archivo que deseas enviar
-                string archivoInforme = "InformeDiario.pdf";
+                // Agregar el archivo PDF como adjunto
+                Attachment attachment = new Attachment(File.OpenRead(filePath), "application/pdf");
+                attachment.Name = "InformeDiario.pdf"; // Nombre del archivo adjunto en el correo
+                message.Attachments.Add(attachment);
 
-                // Paso 5: Abre el archivo en modo lectura
-                using (var stream = System.IO.File.Open(archivoInforme, FileMode.Open))
-                {
-                    var fileName = Path.GetFileName(archivoInforme);
+                // Utilizar la clase SmtpClient para enviar el correo electrónico a través de Gmail
+                SmtpClient client = new SmtpClient(smtpServer, smtpPort);
+                client.Credentials = new NetworkCredential(emailFrom, password);
+                client.EnableSsl = true;
+                client.Send(message);
 
-                    // Paso 6: Crea un objeto InputOnlineFile con el archivo y su nombre
-                    var inputFile = new InputOnlineFile(stream, fileName);
-
-                    // Paso 7: Envía el archivo al chat
-                    await botClient.SendDocumentAsync(chatId, inputFile);
-
-                    // Paso 8: El archivo se envió correctamente
-                    MessageBox.Show("Informe enviado correctamente a través de Telegram.");
-                }
+                MessageBox.Show("El archivo PDF se ha enviado con éxito.");
             }
             catch (Exception ex)
             {
-                // Paso 9: Maneja cualquier error que pueda ocurrir
-                MessageBox.Show("Error al enviar el informe a través de Telegram: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Console.WriteLine(ex.ToString());
+                MessageBox.Show("No se pudo enviar");
             }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            tabControl1.SelectedTab = login;
+            tabControl1.TabPages.Remove(RegistroAdmin);
+            tabControl1.TabPages.Remove(RegistroPers);
         }
     }
 }

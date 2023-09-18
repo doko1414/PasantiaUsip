@@ -30,6 +30,7 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.login = new System.Windows.Forms.TabPage();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.txtContraseñaLogin = new System.Windows.Forms.TextBox();
             this.txtNombreUsuarioLogin = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -37,6 +38,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.RegistroAdmin = new System.Windows.Forms.TabPage();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.txtCelular = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
@@ -60,14 +62,14 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.txtCorreo = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.login.SuspendLayout();
-            this.RegistroAdmin.SuspendLayout();
-            this.RegistroPers.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            this.RegistroAdmin.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.RegistroPers.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -98,6 +100,16 @@
             this.login.Size = new System.Drawing.Size(792, 421);
             this.login.TabIndex = 0;
             this.login.Text = "Login";
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Image = global::RegistroVisitantes.Properties.Resources._6681204;
+            this.pictureBox2.Location = new System.Drawing.Point(347, 38);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(141, 130);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.TabIndex = 13;
+            this.pictureBox2.TabStop = false;
             // 
             // txtContraseñaLogin
             // 
@@ -159,6 +171,8 @@
             // RegistroAdmin
             // 
             this.RegistroAdmin.BackColor = System.Drawing.SystemColors.Info;
+            this.RegistroAdmin.Controls.Add(this.txtCorreo);
+            this.RegistroAdmin.Controls.Add(this.label1);
             this.RegistroAdmin.Controls.Add(this.pictureBox1);
             this.RegistroAdmin.Controls.Add(this.txtCelular);
             this.RegistroAdmin.Controls.Add(this.label12);
@@ -178,9 +192,20 @@
             this.RegistroAdmin.TabIndex = 1;
             this.RegistroAdmin.Text = "RegistroAdmin";
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.pictureBox1.Image = global::RegistroVisitantes.Properties.Resources._366733258_612975617657553_3996130933657315606_n_fotor_bg_remover_20230905104824;
+            this.pictureBox1.Location = new System.Drawing.Point(15, 29);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(377, 339);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 81;
+            this.pictureBox1.TabStop = false;
+            // 
             // txtCelular
             // 
-            this.txtCelular.Location = new System.Drawing.Point(574, 177);
+            this.txtCelular.Location = new System.Drawing.Point(574, 124);
             this.txtCelular.Name = "txtCelular";
             this.txtCelular.Size = new System.Drawing.Size(204, 22);
             this.txtCelular.TabIndex = 80;
@@ -188,7 +213,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(412, 180);
+            this.label12.Location = new System.Drawing.Point(412, 127);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(71, 16);
             this.label12.TabIndex = 79;
@@ -206,14 +231,14 @@
             // 
             // txtContraseña
             // 
-            this.txtContraseña.Location = new System.Drawing.Point(574, 278);
+            this.txtContraseña.Location = new System.Drawing.Point(574, 227);
             this.txtContraseña.Name = "txtContraseña";
             this.txtContraseña.Size = new System.Drawing.Size(204, 22);
             this.txtContraseña.TabIndex = 77;
             // 
             // txtNombreUsuario
             // 
-            this.txtNombreUsuario.Location = new System.Drawing.Point(574, 227);
+            this.txtNombreUsuario.Location = new System.Drawing.Point(574, 171);
             this.txtNombreUsuario.Name = "txtNombreUsuario";
             this.txtNombreUsuario.Size = new System.Drawing.Size(204, 22);
             this.txtNombreUsuario.TabIndex = 76;
@@ -221,7 +246,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(412, 284);
+            this.label10.Location = new System.Drawing.Point(412, 227);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(104, 16);
             this.label10.TabIndex = 75;
@@ -230,7 +255,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(412, 233);
+            this.label11.Location = new System.Drawing.Point(412, 177);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(133, 16);
             this.label11.TabIndex = 74;
@@ -238,14 +263,14 @@
             // 
             // txtApellido
             // 
-            this.txtApellido.Location = new System.Drawing.Point(574, 121);
+            this.txtApellido.Location = new System.Drawing.Point(574, 72);
             this.txtApellido.Name = "txtApellido";
             this.txtApellido.Size = new System.Drawing.Size(204, 22);
             this.txtApellido.TabIndex = 73;
             // 
             // txtNombre
             // 
-            this.txtNombre.Location = new System.Drawing.Point(574, 73);
+            this.txtNombre.Location = new System.Drawing.Point(574, 29);
             this.txtNombre.Name = "txtNombre";
             this.txtNombre.Size = new System.Drawing.Size(204, 22);
             this.txtNombre.TabIndex = 72;
@@ -253,7 +278,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(412, 127);
+            this.label8.Location = new System.Drawing.Point(412, 78);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(83, 16);
             this.label8.TabIndex = 71;
@@ -262,7 +287,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(412, 76);
+            this.label9.Location = new System.Drawing.Point(412, 35);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(69, 16);
             this.label9.TabIndex = 70;
@@ -291,7 +316,7 @@
             // 
             // enviar
             // 
-            this.enviar.Location = new System.Drawing.Point(575, 348);
+            this.enviar.Location = new System.Drawing.Point(557, 347);
             this.enviar.Name = "enviar";
             this.enviar.Size = new System.Drawing.Size(126, 23);
             this.enviar.TabIndex = 73;
@@ -384,26 +409,21 @@
             this.label2.TabIndex = 63;
             this.label2.Text = "NOMBRE:";
             // 
-            // pictureBox2
+            // label1
             // 
-            this.pictureBox2.Image = global::RegistroVisitantes.Properties.Resources._6681204;
-            this.pictureBox2.Location = new System.Drawing.Point(347, 38);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(141, 130);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox2.TabIndex = 13;
-            this.pictureBox2.TabStop = false;
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(412, 278);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(111, 16);
+            this.label1.TabIndex = 82;
+            this.label1.Text = "CORREO GMAIL:";
             // 
-            // pictureBox1
+            // txtCorreo
             // 
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pictureBox1.Image = global::RegistroVisitantes.Properties.Resources._366733258_612975617657553_3996130933657315606_n_fotor_bg_remover_20230905104824;
-            this.pictureBox1.Location = new System.Drawing.Point(15, 29);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(377, 339);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 81;
-            this.pictureBox1.TabStop = false;
+            this.txtCorreo.Location = new System.Drawing.Point(574, 275);
+            this.txtCorreo.Name = "txtCorreo";
+            this.txtCorreo.Size = new System.Drawing.Size(204, 22);
+            this.txtCorreo.TabIndex = 83;
             // 
             // Form1
             // 
@@ -413,15 +433,16 @@
             this.Controls.Add(this.tabControl1);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.tabControl1.ResumeLayout(false);
             this.login.ResumeLayout(false);
             this.login.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.RegistroAdmin.ResumeLayout(false);
             this.RegistroAdmin.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.RegistroPers.ResumeLayout(false);
             this.RegistroPers.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -462,6 +483,8 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtCorreo;
+        private System.Windows.Forms.Label label1;
     }
 }
 
